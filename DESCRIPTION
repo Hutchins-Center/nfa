@@ -26,6 +26,7 @@ Imports:
     glue,
     ggplot2,
     targets,
-    tarchetypes
+    tarchetypes,
+    tidyr
 Depends: 
     R (>= 2.10)

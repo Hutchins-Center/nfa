@@ -1,0 +1,116 @@
+---
+title: "International Investment Positions for Emerging Markets"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+runtime: shiny
+resource_files:
+- data/nfa.rda
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE
+)
+```
+
+
+
+
+```{r, echo = FALSE}
+library('shiny')
+library('DT')
+library('tidyverse')
+library('tsibble')
+library('glue')
+library('sjstats')
+library('sjmisc')
+library('brolgar')
+library('conflicted')
+library('ggthemes')
+library('ggtext')
+library('RColorBrewer')
+library('magrittr')
+library('readxl')
+conflict_prefer("filter", "dplyr")
+source('R/load.R')
+source('R/gdp_ratio.R')
+```
+
+## Emerging Markets
+```{r, echo = FALSE}
+nfa <- readxl::read_xlsx('data/nfa.xlsx')
+emerging <- 
+nfa %>%
+  exclude_countries() %>%
+    offshore_dummy() %>%
+    large_offshore_dummy() %>%
+    advanced_economies_dummy() %>%
+    emerging_economies_dummy() %>%
+get_gdp_ratios() %>%
+dplyr::filter(emerging == 1) 
+```
+
+
+
+```{r, echo = FALSE}
+mydata <- reactive({
+emerging %>%
+    as_tibble() %>%
+    filter(country %in% input$mycountry) %>%
+    select(date, country, input$mycolumns) 
+})
+```
+
+```{r, echo = FALSE}
+
+df <- reactive({
+  emerging %>%
+    filter(country %in% input$mycountry) %>%
+    select(date, country, input$mycolumns) 
+})
+```
+
+
+
+
+
+```{r, echo = FALSE}
+selectInput("mycountry", "Choose one or more countries: ", 
+  choices = sort(unique(emerging$country)), 
+  selected = c("Afghanistan, I.R. of", "Albania", "Algeria"), multiple = TRUE)
+
+selectInput("mycolumns", "Choose one variable: ", 
+  choices = emerging %>% as_tibble() %>% select(-c(date, country, ifs_code)) %>%names(), 
+  selected = "ipnfay", multiple = FALSE)
+
+renderPlot({
+  ggplot(df(), aes(x = date, color = country)) +
+    geom_line(aes_string(y = input$mycolumns), alpha = 5, size = 1) +
+    theme_minimal() +
+    theme_hc() +
+    custom_theme() +
+    ggtitle(glue::glue('**Time series of {input$mycolumns} from 1970-2019**')) +
+    theme(plot.title = element_markdown(size = 16)) + 
+    scale_color_brewer( type = 'qual')
+})
+```
+
+
+```{r, echo = FALSE}
+ downloadButton('download',"Download the data")
+renderDT({
+  DT::datatable(mydata(), filter = 'top')  %>% formatRound(input$mycolumns, 2) 
+  })
+
+downloadHandler(
+    filename = function(){"nfa_summary.csv"}, 
+    content = function(fname){
+      write.csv(mydata(), fname)
+    }
+  )
+```

@@ -1,3 +1,5 @@
+library('tsibble')
+library('magrittr')
 ## code to prepare `DATASET` dataset goes here
 nfa <-
   readxl::read_xlsx('inst/extdata/NFA data for CGER 1970-2020.xlsx',
@@ -13,9 +15,7 @@ nfa_plus <-
   mutate(source = 'nfa_plus')
 
 nfa %<>%
-  left_join(nfa_plus)
+  full_join(nfa_plus)
 
-%>%
-  save(., file = 'data/nfa.RData') %>%
-  usethis::use_data(overwrite = TRUE)
+  usethis::use_data(nfa, 'data/nfa.rda', overwrite = TRUE)
 
