@@ -36,14 +36,13 @@ library('ggtext')
 library('RColorBrewer')
 library('magrittr')
 library('readxl')
+devtools::install_github('Hutchins-Center/nfa')
+library('nfa')
 conflict_prefer("filter", "dplyr")
-source('R/load.R')
-source('R/gdp_ratio.R')
 ```
 
 ## Emerging Markets
 ```{r, echo = FALSE}
-nfa <- readxl::read_xlsx('data/nfa.xlsx')
 emerging <- 
 nfa %>%
   exclude_countries() %>%

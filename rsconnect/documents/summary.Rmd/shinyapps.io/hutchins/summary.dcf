@@ -5,8 +5,8 @@ account: hutchins
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3625812
-bundleId: 4215130
+bundleId: 4215253
 url: https://hutchins.shinyapps.io/summary/
-when: 1613142832.23371
+when: 1613145021.4235
 asMultiple: FALSE
 asStatic: FALSE
